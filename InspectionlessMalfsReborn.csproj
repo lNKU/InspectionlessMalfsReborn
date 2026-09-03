@@ -1,0 +1,49 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <RootNamespace>InspectionlessMalfsReborn</RootNamespace>
+        <Description>Makes Malfunctions Inspectionless</Description>
+        <OutputPath>bin\$(Configuration)\$(ProjectName)\plugins\INKU-$(AssemblyName)\</OutputPath>
+        <Version>1.0.0</Version>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <!-- Update HintPath to your SPT 4.1.x install path -->
+    <ItemGroup>
+        <Reference Include="BepInEx">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/BepInEx/core/BepInEx.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="spt-reflection">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/BepInEx/plugins/spt/spt-reflection.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="ItemComponent.Types">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/EscapeFromTarkov_Data/Managed/ItemComponent.Types.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Comfort">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/EscapeFromTarkov_Data/Managed/Comfort.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Assembly-CSharp">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/EscapeFromTarkov_Data/Managed/Assembly-CSharp.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/EscapeFromTarkov_Data/Managed/UnityEngine.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/EscapeFromTarkov_Data/Managed/UnityEngine.CoreModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule">
+            <HintPath>/mnt/970_evo/Games/SPTarkov/EscapeFromTarkov_Data/Managed/UnityEngine.IMGUIModule.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+    </ItemGroup>
+
+</Project>
