@@ -1,13 +1,14 @@
-﻿using BepInEx;
+﻿using System;
+using System.Reflection;
+using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
 using Comfort.Common;
 using EFT;
 using EFT.InventoryLogic;
 using UnityEngine;
-using InspectionlessMalfsReborn;
 
-namespace InspectionlessMalfs
+namespace InspectionlessMalfsReborn
 {
     [BepInPlugin("com.inspectionlessmalfsreborn.inku", "InspectionlessMalfsReborn", "1.0.0")]
     public class Plugin : BaseUnityPlugin
@@ -17,7 +18,7 @@ namespace InspectionlessMalfs
         public const string PLUGIN_VERSION = "1.0.0";
         public static ConfigEntry<bool> ModEnabled { get; private set; }
         public static ConfigEntry<bool> DebugEnabled { get; private set; }
-        public static ConfigEntry<KeyboardShortcut> ForceMalfKey { get; private set; }
+        public static ConfigEntry<KeyboardShortcut> ForceOverheatKey { get; private set; }
         public static ManualLogSource Log { get; private set; }
         
         private void Awake()
@@ -29,51 +30,39 @@ namespace InspectionlessMalfs
                 "1. General",
                 "Mod Enabled",
                 true,
-                "Enable or disable inspectionless malfunction identification. ON - clear malfunctions without inspecting. OFF - vanilla EFT behavior."
+                "Enable or disable inspectionless malfunction identification.\nON - clear malfunctions without inspecting. OFF - vanilla EFT behavior."
             );
-
+            
             DebugEnabled = Config.Bind(
                 "2. Debug",
                 "Debug Enabled",
                 false,
-                "Allow debug options to take effect, like forced weapon malfunctions."
+                "Enable/Disable debugging options."
             );
 
-            ForceMalfKey = Config.Bind(
+            ForceOverheatKey = Config.Bind(
                 "2. Debug",
-                "Force Malfunction Key",
+                "Force Overheat",
                 new KeyboardShortcut(KeyCode.End),
-                "Keybind to force a malfunction on currently equipped weapon."
+                "Keybind to instantly overheat currently active weapon."
             );
             
             new KnowMalf().Enable();
-            Log.LogInfo($"{PLUGIN_NAME} is loaded!");
+            Log.LogInfo($"{PLUGIN_NAME} loaded!");
         }
         
         private void Update()
         {
-            if (DebugEnabled.Value && ForceMalfKey.Value.IsDown())
+            if (DebugEnabled.Value && ForceOverheatKey.Value.IsDown())
             {
-                ForceWeaponMalfunction();
+                ForceWeaponOverheat();
             }
         }
-
-        private void ForceWeaponMalfunction()
+        
+        private void ForceWeaponOverheat()
         {
             var gameWorld = Singleton<GameWorld>.Instance;
-            if (gameWorld == null || gameWorld.MainPlayer == null)
-            {
-                return;
-            }
-            
-            Weapon.EMalfunctionState[] malfunctionTypes = new[]
-            {
-                Weapon.EMalfunctionState.Misfire,
-                Weapon.EMalfunctionState.Jam,
-                Weapon.EMalfunctionState.Feed,
-                Weapon.EMalfunctionState.HardSlide,
-                Weapon.EMalfunctionState.SoftSlide
-            };
+            if (gameWorld == null || gameWorld.MainPlayer == null) return;
 
             Player player = gameWorld.MainPlayer;
             if (player.HandsController is Player.FirearmController firearmController)
@@ -81,12 +70,31 @@ namespace InspectionlessMalfs
                 Weapon weapon = firearmController.Item;
                 if (weapon == null) return;
 
-                // force a random malfunction state on the current firearm
-                Weapon.EMalfunctionState randomMalf = malfunctionTypes[UnityEngine.Random.Range(0, malfunctionTypes.Length)];
-                weapon.MalfState.State = randomMalf;
-                
-                Log.LogInfo($"[{PLUGIN_NAME}] Successfully forced random malfunction - {randomMalf} - on active weapon ({weapon.ShortName.Localized()}).");
+                if (SetWeaponHeat(weapon, 500f))
+                {
+                    Log.LogInfo($" *** DEBUG *** Successfully forced overheat on {weapon.ShortName.Localized()}.");
+                }
+                else
+                {
+                    Log.LogWarning($" *** DEBUG *** Could not apply overheat to {weapon.ShortName.Localized()}.");
+                }
             }
+        }
+        
+        private bool SetWeaponHeat(Weapon weapon, float heatValue)
+        {
+            if (weapon?.MalfState == null) return false;
+
+            Type malfStateType = weapon.MalfState.GetType();
+            FieldInfo overheatField = malfStateType.GetField("LastShotOverheat", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+
+            if (overheatField != null && overheatField.FieldType == typeof(float))
+            {
+                overheatField.SetValue(weapon.MalfState, heatValue);
+                return true;
+            }
+
+            return false;
         }
     }
 }

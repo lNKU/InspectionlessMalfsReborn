@@ -2,11 +2,14 @@ using System;
 using System.Reflection;
 using SPT.Reflection.Patching;
 using HarmonyLib;
+using EFT;
 using EFT.InventoryLogic;
-using InspectionlessMalfs;
+using UnityEngine;
+using InspectionlessMalfsReborn;
 
 namespace InspectionlessMalfsReborn
 {
+    // forces the game to recognize that the player knows the SPECIFIC TYPE of malfunction
     public class KnowMalf : ModulePatch
     {
         protected override MethodBase GetTargetMethod()
@@ -20,7 +23,6 @@ namespace InspectionlessMalfsReborn
         [PatchPostfix]
         private static void PatchPostfix(ref bool __result)
         {
-            // If the toggle in BepInEx menu is disabled, skip modifying the result
             if (!Plugin.ModEnabled.Value)
             {
                 return;
