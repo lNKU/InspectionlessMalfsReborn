@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using InspectionlessMalfsReborn;
 using BepInEx;
 using BepInEx.Configuration;
 using BepInEx.Logging;
@@ -10,7 +11,7 @@ using UnityEngine;
 
 namespace InspectionlessMalfsReborn
 {
-    [BepInPlugin("com.inspectionlessmalfsreborn.inku", "InspectionlessMalfsReborn", "1.0.0")]
+    [BepInPlugin("com.inku.inspectionlessmalfsreborn", "InspectionlessMalfsReborn", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "com.inku.inspectionlessmalfsreborn";
@@ -46,7 +47,7 @@ namespace InspectionlessMalfsReborn
                 new KeyboardShortcut(KeyCode.End),
                 "Keybind to instantly overheat currently active weapon."
             );
-            
+
             new KnowMalf().Enable();
             Log.LogInfo($"{PLUGIN_NAME} loaded!");
         }
@@ -63,13 +64,13 @@ namespace InspectionlessMalfsReborn
         {
             var gameWorld = Singleton<GameWorld>.Instance;
             if (gameWorld == null || gameWorld.MainPlayer == null) return;
-
+        
             Player player = gameWorld.MainPlayer;
             if (player.HandsController is Player.FirearmController firearmController)
             {
                 Weapon weapon = firearmController.Item;
                 if (weapon == null) return;
-
+        
                 if (SetWeaponHeat(weapon, 500f))
                 {
                     Log.LogInfo($" *** DEBUG *** Successfully forced overheat on {weapon.ShortName.Localized()}.");
@@ -84,16 +85,16 @@ namespace InspectionlessMalfsReborn
         private bool SetWeaponHeat(Weapon weapon, float heatValue)
         {
             if (weapon?.MalfState == null) return false;
-
+        
             Type malfStateType = weapon.MalfState.GetType();
             FieldInfo overheatField = malfStateType.GetField("LastShotOverheat", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-
+        
             if (overheatField != null && overheatField.FieldType == typeof(float))
             {
                 overheatField.SetValue(weapon.MalfState, heatValue);
                 return true;
             }
-
+        
             return false;
         }
     }
